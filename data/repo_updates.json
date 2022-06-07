@@ -1,0 +1,47 @@
+{
+    "author_date": "2022-05-13 20:33:25-04:00",
+    "author_email": "83766133+ming-afk@users.noreply.github.com",
+    "author_name": "Minghao Li",
+    "author_timezone": 14400,
+    "branches": "{'main'}",
+    "committer_date": "2022-05-13 20:33:25-04:00",
+    "committer_email": "noreply@github.com",
+    "committer_name": "GitHub",
+    "committer_timezone": 14400,
+    "deletions": 0,
+    "file": [
+        {
+            "added_lines": 1,
+            "complexity": null,
+            "deleted_lines": 0,
+            "diff_parsed": {
+                "added": [
+                    [
+                        1,
+                        "This is Minghao's Code of Conduct"
+                    ]
+                ],
+                "deleted": []
+            },
+            "filename": "CODE_OF_CONDUCT.md",
+            "language_supported": false,
+            "new_path": "CODE_OF_CONDUCT.md",
+            "nloc": null,
+            "old_path": null,
+            "token_count": null
+        }
+    ],
+    "files": 1,
+    "hash": "b1f1827954639f2505f9b463196bc32987b2e25a",
+    "in_main_branch": true,
+    "insertions": 1,
+    "lines": 1,
+    "merge": false,
+    "msg": "Create CODE_OF_CONDUCT.md",
+    "parents": [
+        "ca9c457bdac9f7f82a950d756d159741e593e260"
+    ],
+    "project_name": "Octlearner",
+    "project_path": "/Users/minghaoli/Documents/CoC_Updates_Crawler_new/Octlearner",
+    "repository": "ming-afk/Octlearner"
+}
