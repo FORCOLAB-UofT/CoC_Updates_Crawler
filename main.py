@@ -10,11 +10,11 @@ from datetime import datetime as dt
 
 def save_xlsx(update_df):
     try:
-        cur_df = pd.read_excel('data/repo_updates.xlsx')
+        cur_df = pd.read_excel('data/repo_updates5.xlsx')
         cont_df = pd.concat([cur_df, update_df], ignore_index = True)
-        cont_df.to_excel('data/repo_updates.xlsx')
+        cont_df.to_excel('data/repo_updates5.xlsx')
     except FileNotFoundError:
-        update_df.to_excel('data/repo_updates.xlsx')
+        update_df.to_excel('data/repo_updates5.xlsx')
     return
 
 
@@ -28,7 +28,7 @@ def save_csv(update_df):
     return
 
 def save_json(update_di):
-    print('called')
+    # print('called')
     start = dt.now()
     jstring = json.dumps(update_di, indent=4, sort_keys=True, default=str)
 
@@ -82,8 +82,33 @@ def print_fields():
 
 if __name__ == "__main__":
 
+    # SAMPLING DATA
+    # ext = pd.read_csv('data/extracted_coc_issue_commits.csv')
+    # li = [3, 300, 3000, 20000, 2500, 2600, 1900, 45, 260, 10000, 10567, 345, 30, 3590, 10496, 10294, 5329, 12053, 4000, 21400]
+    #
+    # sam = ext.iloc[li]
+    # print(len(sam))
+    # sam.to_csv('data/lang_filtered_sampled_extracted_coc_issue_commits.csv')
+    #
 
-    repos = pd.read_csv('data/GitHub_sorted_issue_commit_all.csv', nrows=1)['repository']
+    # DIVIDING DATA
+    # repos = pd.read_csv('data/extracted_coc_issue_commits.csv')
+    # # partition dataset into 50 parts, each is 515.64 == 516 repos
+    # for i in (range(1,51,1)):
+    #     start = 516*(i-1)
+    #     end = 516 * i
+    #     print(start)
+    #     print(end)
+    #     print()
+    #     print()
+    #     if end >25284:
+    #         repo = repos[start:]
+    #     else:
+    #         repo = repos[start:end]
+    #     repo.to_csv('data/extracted_coc_issue_commits_' + str(i) +'.csv')
+
+
+    repos = pd.read_csv('data/extracted_coc_issue_commits_5.csv')['repository']
 
     # repos = ['ming-afk/Octlearner']
 
@@ -93,7 +118,8 @@ if __name__ == "__main__":
                               'committer_date', 'committer_timezone', 'committer_name',\
                               'committer_email', 'merge', 'branches']})
 
-    save_wait = 2 # wait for another repo before saving
+    # wait for another repo before saving
+    save_wait = 2
 
     for repo in repos:
 
@@ -109,26 +135,29 @@ if __name__ == "__main__":
         # start = dt.now()
 
         # checking file title with grep
-        os.system("git ls-tree -r HEAD | grep -i -E 'code\s*_?-?of\s*_?-?conduct' > ../out.txt")
-        f = open("../out.txt", "r")
+        os.system("git ls-tree -r HEAD | grep -i -E 'code\s*_?-?of\s*_?-?conduct' > ../out5.txt")
+        f = open("../out5.txt", "r")
         # print("saving to txt and opening it took: ", dt.now()-start, " seconds")
 
         paths = list()
         for line in f.readlines():
-            print(line)
-            print(type(line))
+            # print(line)
+            # print(type(line))
             res = line.replace('\t',' ').replace('\n','').split(' ')
             paths.append(' '.join(res[3:]))
 
         # checking file content with below command
         # "git grep -l "code of conduct""
-        os.system('git grep -l -i -E "code\s*_?-?of\s*_?-?conduct"> ../out.txt')
-        f = open("../out.txt", "r")
+        os.system('git grep -l -i -E "code\s*_?-?of\s*_?-?conduct"> ../out5.txt')
+        f = open("../out5.txt", "r")
 
         cont_res = f.readlines()
         for i in cont_res:
             paths.append(i.replace('\t',' ').replace('\n',''))
-        print(paths)
+        # print(paths)
+
+        # eliminating duplicates in file paths
+        mylist = list(dict.fromkeys(paths))
 
         # cont_res = cont
         # assumption for string matching:
@@ -141,9 +170,9 @@ if __name__ == "__main__":
 
                 update_di = {'repository': repo, 'hash': r.hash, 'lines':r.lines, 'project_name':r.project_name,\
                               'msg':r.msg, 'project_path': r.project_path, 'insertions':r.insertions,\
-                              'deletions': r.deletions, 'in_main_branch':r.in_main_branch, 'files':r.files, 'author_date':r.author_date,\
+                              'deletions': r.deletions, 'in_main_branch':r.in_main_branch, 'files':r.files, 'author_date':str(r.author_date),\
                               'author_timezone': r.author_timezone, 'author_name':r.author.name, 'author_email':r.author.email,\
-                              'committer_date': r.committer_date, 'committer_timezone':r.committer_timezone,\
+                              'committer_date': str(r.committer_date), 'committer_timezone':r.committer_timezone,\
                               'committer_email': r.committer.email, 'committer_name':r.committer.name, 'merge':r.merge,\
                               'branches': str(r.branches).replace('{','').replace('}','')}
 
@@ -171,7 +200,7 @@ if __name__ == "__main__":
                     if val is None:
                         update_di[key] = "None"
 
-                print(type(update_di))
+                # print(type(update_di))
                 # for key, val in update_di.items():
                 #     print('type of each dict val is: ', type(val))
                 #     print('the key is ', key)
