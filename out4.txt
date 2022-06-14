@@ -1,6 +1,0 @@
-CHANGELOG.md
-CODE_OF_CONDUCT.md
-README.md
-nf_core/lint/files_exist.py
-nf_core/lint/files_unchanged.py
-nf_core/pipeline-template/CODE_OF_CONDUCT.md
