@@ -6,9 +6,10 @@ import subprocess
 import json
 import subprocess
 import time
+import regex as re
 from datetime import datetime as dt
-
-num = 9
+import CoC_update_times.update_after_creation as updates
+num = 20
 
 def save_xlsx(update_df):
     try:
@@ -29,6 +30,7 @@ def save_csv(update_df):
         update_df.to_csv('_data_/repo_updates.csv')
     return
 
+
 def save_json(update_di):
     # print('called')
     start = dt.now()
@@ -41,12 +43,13 @@ def save_json(update_di):
     print("saving alone took: ", dt.now()-start, ' seconds')
        # update_df.to_csv('../_data_/GiHub_repo_with_coc_updates.csv')
 
+
 def extract():
 
     repos = pd.read_csv('_data_/extracted_coc_issue_commits_'+str(num)+'.csv')['repository']
+    # repos = ['ming-afk/Octlearner']
 
-
-    update_df = pd.DataFrame({key: [] for key in ['repository', 'project_name', 'msg', 'hash', 'lines', 'file', 'project_path', 'insertions',\
+    update_df = pd.DataFrame({key: [] for key in ['repository', 'project_name', 'coc_location', 'msg', 'hash', 'lines', 'file', 'project_path', 'insertions',\
                               'deletions', 'in_main_branch', 'files', 'author_date',\
                               'author_timezone', 'author_name', 'author_email',\
                               'committer_date', 'committer_timezone', 'committer_name',\
@@ -115,9 +118,16 @@ def extract():
         for path in paths:
             print('current file path is: ', path)
             for r in Repository('.', filepath=path).traverse_commits():
+                #note that those files having CoC in both title and content will have been
+                # marked as 'title', but that dn affect as we only wawnt to isolate those
+                # only having CoC keywords in the content
+
+                location = 'content'
+                if re.findall('code\s*_?-?of\s*_?-?conduct', path.lower()):
+                    location = 'title'
 
                 update_di = {'repository': repo, 'hash': r.hash, 'lines':r.lines, 'project_name':r.project_name,\
-                              'msg':r.msg, 'project_path': r.project_path, 'insertions':r.insertions,\
+                              'msg':r.msg, 'project_path': r.project_path, 'insertions':r.insertions, 'coc_location':location\
                               'deletions': r.deletions, 'in_main_branch':r.in_main_branch, 'files':r.files, 'author_date':str(r.author_date),\
                               'author_timezone': r.author_timezone, 'author_name':r.author.name, 'author_email':r.author.email,\
                               'committer_date': str(r.committer_date), 'committer_timezone':r.committer_timezone,\
@@ -133,7 +143,7 @@ def extract():
                         file_di = {'old_path': ifile.old_path, 'complexity':ifile.complexity,\
                                 'new_path': ifile.new_path, 'filename': ifile.filename, \
                                 'added_lines': ifile.added_lines, \
-                                'deleted_lines': ifile.deleted_lines, 'diff_parsed': ifile.diff_parsed, \
+                                'deleted_lines': ifile.deleted_lines, 'diff':ifile.diff, 'diff_parsed': ifile.diff_parsed, \
                                 'language_supported': ifile.language_supported, 'nloc': ifile.nloc, \
                                 'token_count': ifile.token_count, 'change_type': ifile.change_type.name}
                         files.append(file_di)
@@ -179,7 +189,7 @@ def extract():
             save_xlsx(update_df)
             update_df = pd.DataFrame({key: [] for key in
                                       ['repository', 'project_name', 'msg', 'hash', 'lines', 'file', 'project_path',
-                                       'insertions', \
+                                       'insertions', 'coc_location' \
                                        'deletions', 'in_main_branch', 'files', 'author_date', \
                                        'author_timezone', 'author_name', 'author_email', \
                                        'committer_date', 'committer_timezone', 'committer_name', \
@@ -288,11 +298,15 @@ if __name__ == "__main__":
     #         repo = repos[start:end]
     #     repo.to_csv('_data_/deep_partition/extracted_coc_issue_commits_1_'+str(i)+'.csv')
 
-    pd.read_excel('finished_repos/first_6_parts_attempt_1.xlsx')
-
+    # pd.read_excel('finished_repos/first_6_parts_attempt_1.xlsx')
+    #
     extract()
     # combine()
     # analyze()
+
+    # updates.filter_repo_without_updates()
+    # print(len(pd.read_csv('_data_/CoC_text_updates_from_newest_attempts_file.csv').drop_duplicates('repository')))
+
 
 
 
