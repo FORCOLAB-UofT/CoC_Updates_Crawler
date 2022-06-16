@@ -7,9 +7,10 @@ import json
 import subprocess
 import time
 import regex as re
-from datetime import datetime as dt
+import datetime as dt
 import CoC_update_times.update_after_creation as updates
-num = 20
+
+num = 7
 
 def save_xlsx(update_df):
     try:
@@ -33,14 +34,14 @@ def save_csv(update_df):
 
 def save_json(update_di):
     # print('called')
-    start = dt.now()
+    start = dt.datetime.now()
     jstring = json.dumps(update_di, indent=4, sort_keys=True, default=str)
 
     # with open("../_data_/tensorflow_repo_updates.json", "w+") as fp:
     with open("_data_/repo_updates.json", "a") as fp:
         fp.write(jstring)
         fp.close()
-    print("saving alone took: ", dt.now()-start, ' seconds')
+    print("saving alone took: ", dt.datetime.now()-start, ' seconds')
        # update_df.to_csv('../_data_/GiHub_repo_with_coc_updates.csv')
 
 
@@ -61,13 +62,14 @@ def extract():
 
     for repo in repos:
     # getting the repositroy
+
         repo_count+=1
         print("On the ", repo_count, 'th repo')
 
-        start = dt.now()
+        start = dt.datetime.now()
         try:
             os.system('git clone "https://github.com/'+repo+'"')
-            print("cloning along took: ", dt.now()-start, ' seconds')
+            print("cloning along took: ", dt.datetime.now()-start, ' seconds')
         except FileNotFoundError:
             with open("../notFound.txt", "+w") as text_file:
                 text_file.write("not found error repo: %s" % repo)
@@ -110,12 +112,20 @@ def extract():
         paths = []
         [paths.append(x) for x in pt if x not in paths]
 
+        # if too many paths are there, just skip this repo as it will take too long
+        # the repos that are skipped will be collected when all others are crawled
+        if len(paths) > 15:
+            continue
+
     # cont_res = cont
         # assumption for string matching:
         #   1. that the file path will end in: ".file_extension:"
 
-        start = dt.now()
+        start = dt.datetime.now()
+
         for path in paths:
+            # if (dt.datetime.now()-start) > dt.timedelta(hours=0.5):
+            #     break
             print('current file path is: ', path)
             for r in Repository('.', filepath=path).traverse_commits():
                 #note that those files having CoC in both title and content will have been
@@ -127,12 +137,13 @@ def extract():
                     location = 'title'
 
                 update_di = {'repository': repo, 'hash': r.hash, 'lines':r.lines, 'project_name':r.project_name,\
-                              'msg':r.msg, 'project_path': r.project_path, 'insertions':r.insertions, 'coc_location':location\
+                              'msg':r.msg, 'project_path': r.project_path, 'insertions':r.insertions, 'coc_location':location, \
                               'deletions': r.deletions, 'in_main_branch':r.in_main_branch, 'files':r.files, 'author_date':str(r.author_date),\
                               'author_timezone': r.author_timezone, 'author_name':r.author.name, 'author_email':r.author.email,\
                               'committer_date': str(r.committer_date), 'committer_timezone':r.committer_timezone,\
                               'committer_email': r.committer.email, 'committer_name':r.committer.name, 'merge':r.merge,\
                               'branches': str(r.branches).replace('{','').replace('}','')}
+
 
                 files = list()
 
@@ -175,9 +186,10 @@ def extract():
                 # cur_df = cur_df.transpose()
                 # print(cur_df)
 
+                # append to dataframe once per path
                 update_df = pd.concat([update_df, cur_df])
 
-        print("one repo _data_ field extraction and saving took: ", dt.now()-start, " seconds")
+        print("one repo _data_ field extraction and saving took: ", dt.datetime.now()-start, " seconds")
 
         os.chdir("..")
         os.system('rm -rf '+repo.split('/')[1])
@@ -194,6 +206,7 @@ def extract():
                                        'author_timezone', 'author_name', 'author_email', \
                                        'committer_date', 'committer_timezone', 'committer_name', \
                                        'committer_email', 'merge', 'branches']})
+
         # clear paths in the out.txt file
         open('out'+str(num)+'.txt', 'w').close()
     # save_json({'_data_': js_li})
